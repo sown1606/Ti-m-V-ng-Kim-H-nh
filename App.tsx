@@ -59,7 +59,7 @@ const App: React.FC = () => {
   const removeProductFromBuilder = (instanceId: number) => {
     setSelectedProducts(prev => prev.filter(p => p.instanceId !== instanceId));
   };
-  
+
   const handleSaveCollection = () => {
     if (!user || !user.phone) {
       alert("Please provide user information before saving.");
@@ -67,7 +67,7 @@ const App: React.FC = () => {
     }
     const savedCollectionsJSON = localStorage.getItem('jewelryCollections');
     let savedCollections: SavedCollection[] = savedCollectionsJSON ? JSON.parse(savedCollectionsJSON) : [];
-    
+
     const existingIndex = savedCollections.findIndex(c => c.phone === user.phone);
     const newCollection: SavedCollection = { phone: user.phone, products: selectedProducts };
 
@@ -76,7 +76,7 @@ const App: React.FC = () => {
     } else {
       savedCollections.push(newCollection);
     }
-    
+
     localStorage.setItem('jewelryCollections', JSON.stringify(savedCollections));
     alert("Bộ sưu tập đã được lưu!");
   };
@@ -109,15 +109,15 @@ const App: React.FC = () => {
     if (error) {
        return <div className="text-center text-red-400 text-xl p-4">{error}</div>;
     }
-    
+
     return (
         <main className="p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
             <div className="lg:col-span-3">
                 <CategoryPanel categories={categories} onProductSelect={addProductToBuilder} />
             </div>
             <div className="lg:col-span-6">
-                <ProductBuilder 
-                    products={selectedProducts} 
+                <ProductBuilder
+                    products={selectedProducts}
                     setProducts={setSelectedProducts}
                     onRemoveProduct={removeProductFromBuilder}
                     onSave={handleSaveCollection}
@@ -140,7 +140,7 @@ const App: React.FC = () => {
                     {renderContent()}
                 </div>
             </div>
-            <audio ref={audioRef} src="/musics/background-music.mp3" loop muted />
+            <audio ref={audioRef} src="/musics/background-music.mp3" loop/>
             <button
                 onClick={toggleMute}
                 className="fixed bottom-4 right-4 bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-full shadow-lg transition-transform transform hover:scale-110"
