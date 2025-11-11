@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Product, SavedCollection } from './types';
+import { User, Product, SavedCollection, Category } from './types';
 import UserInfoModal from './components/UserInfoModal';
 import Header from './components/Header';
 import CategoryPanel from './components/CategoryPanel';
@@ -7,13 +7,33 @@ import ProductBuilder from './components/ProductBuilder';
 import AiAssistant from './components/AiAssistant';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { VolumeX, Volume2 } from 'lucide-react';
+import { VolumeX, Volume2, LoaderCircle } from 'lucide-react';
+import { fetchCategoriesWithProducts } from './services/strapiService';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
   const [isMuted, setIsMuted] = useState(true);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const fetchedCategories = await fetchCategoriesWithProducts();
+        setCategories(fetchedCategories);
+      } catch (e) {
+        setError('Không thể tải dữ liệu sản phẩm từ máy chủ. Vui lòng thử lại sau.');
+        console.error(e);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+    loadCategories();
+  }, []);
+
 
   useEffect(() => {
     if (user?.phone) {
@@ -76,29 +96,51 @@ const App: React.FC = () => {
     return <UserInfoModal onSubmit={handleUserSubmit} />;
   }
 
+  const renderContent = () => {
+    if (isLoadingCategories) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full">
+          <LoaderCircle className="animate-spin text-yellow-400" size={48} />
+          <p className="mt-4 text-lg text-yellow-200">Đang tải dữ liệu sản phẩm...</p>
+        </div>
+      );
+    }
+
+    if (error) {
+       return <div className="text-center text-red-400 text-xl p-4">{error}</div>;
+    }
+    
+    return (
+        <main className="p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div className="lg:col-span-3">
+                <CategoryPanel categories={categories} onProductSelect={addProductToBuilder} />
+            </div>
+            <div className="lg:col-span-6">
+                <ProductBuilder 
+                    products={selectedProducts} 
+                    setProducts={setSelectedProducts}
+                    onRemoveProduct={removeProductFromBuilder}
+                    onSave={handleSaveCollection}
+                />
+            </div>
+            <div className="lg:col-span-3">
+                <AiAssistant user={user} />
+            </div>
+        </main>
+    );
+  }
+
+
   return (
     <DndProvider backend={HTML5Backend}>
         <div className="min-h-screen bg-cover bg-center bg-fixed text-yellow-50" style={{backgroundImage: "url('/images/backgrounds/main-bg.jpg')"}}>
-            <div className="min-h-screen bg-black bg-opacity-70">
+            <div className="min-h-screen bg-black bg-opacity-70 flex flex-col">
                 <Header />
-                <main className="p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
-                    <div className="lg:col-span-3">
-                        <CategoryPanel onProductSelect={addProductToBuilder} />
-                    </div>
-                    <div className="lg:col-span-6">
-                        <ProductBuilder 
-                            products={selectedProducts} 
-                            setProducts={setSelectedProducts}
-                            onRemoveProduct={removeProductFromBuilder}
-                            onSave={handleSaveCollection}
-                        />
-                    </div>
-                    <div className="lg:col-span-3">
-                        <AiAssistant user={user} />
-                    </div>
-                </main>
+                <div className="flex-grow flex items-center justify-center">
+                    {renderContent()}
+                </div>
             </div>
-            <audio ref={audioRef} src="/music/background-music.mp3" loop muted />
+            <audio ref={audioRef} src="/musics/background-music.mp3" loop muted />
             <button
                 onClick={toggleMute}
                 className="fixed bottom-4 right-4 bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-full shadow-lg transition-transform transform hover:scale-110"

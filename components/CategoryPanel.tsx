@@ -1,25 +1,41 @@
 
-import React, { useState } from 'react';
-import { Product } from '../types';
-import { CATEGORIES } from '../constants';
+import React, { useState, useEffect } from 'react';
+import { Product, Category } from '../types';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface Props {
+  categories: Category[];
   onProductSelect: (product: Product) => void;
 }
 
-const CategoryPanel: React.FC<Props> = ({ onProductSelect }) => {
-  const [openCategory, setOpenCategory] = useState<string | null>(CATEGORIES[0]?.name || null);
+const CategoryPanel: React.FC<Props> = ({ categories, onProductSelect }) => {
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Tự động mở danh mục đầu tiên khi dữ liệu được tải
+    if (categories.length > 0 && !openCategory) {
+      setOpenCategory(categories[0].name);
+    }
+  }, [categories, openCategory]);
 
   const toggleCategory = (name: string) => {
     setOpenCategory(prev => (prev === name ? null : name));
   };
+  
+  if (categories.length === 0) {
+    return (
+        <div className="bg-black bg-opacity-40 border border-yellow-800 rounded-lg p-4 h-full max-h-[80vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-yellow-400 mb-4 border-b border-yellow-700 pb-2">Sản phẩm</h3>
+            <p className="text-yellow-200">Không có sản phẩm nào.</p>
+        </div>
+    );
+  }
 
   return (
     <div className="bg-black bg-opacity-40 border border-yellow-800 rounded-lg p-4 h-full max-h-[80vh] overflow-y-auto">
       <h3 className="text-xl font-bold text-yellow-400 mb-4 border-b border-yellow-700 pb-2">Sản phẩm</h3>
       <div className="space-y-2">
-        {CATEGORIES.map(category => (
+        {categories.map(category => (
           <div key={category.name}>
             <button
               onClick={() => toggleCategory(category.name)}
