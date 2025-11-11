@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { User, PurchaseType, PersonInfo } from '../types';
 
@@ -44,11 +43,11 @@ const UserInfoModal: React.FC<Props> = ({ onSubmit }) => {
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center bg-cover bg-center"
-      style={{backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1587767223618-935171158a8a?q=80&w=1974&auto=format&fit=crop')"}}
+      style={{backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1610041321420-596317551435?q=80&w=1974&auto=format&fit=crop')"}}
     >
       <div className="bg-gray-800 border border-yellow-600 rounded-lg shadow-2xl p-8 w-full max-w-lg text-yellow-50">
         <h2 className="text-3xl font-bold text-center mb-2 text-yellow-400">Chào mừng đến với Kim Hạnh II</h2>
-        <p className="text-center text-gray-300 mb-6">Cung cấp thông tin của bạn để AI có thể phân tích và đưa ra những tư vấn phong thủy chính xác và cá nhân hóa nhất.</p>
+        <p className="text-center text-gray-300 mb-6">Cung cấp thông tin của bạn để AI phân tích và tư vấn bộ trang sức hoàn hảo, mang lại may mắn và tài lộc.</p>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
