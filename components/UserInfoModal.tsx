@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { User, PurchaseType, PersonInfo } from '../types';
 
@@ -41,10 +42,13 @@ const UserInfoModal: React.FC<Props> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-cover bg-center"
+      style={{backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1587767223618-935171158a8a?q=80&w=1974&auto=format&fit=crop')"}}
+    >
       <div className="bg-gray-800 border border-yellow-600 rounded-lg shadow-2xl p-8 w-full max-w-lg text-yellow-50">
         <h2 className="text-3xl font-bold text-center mb-2 text-yellow-400">Chào mừng đến với Kim Hạnh II</h2>
-        <p className="text-center text-gray-300 mb-6">Vui lòng cung cấp thông tin để nhận tư vấn phong thủy tốt nhất.</p>
+        <p className="text-center text-gray-300 mb-6">Cung cấp thông tin của bạn để AI có thể phân tích và đưa ra những tư vấn phong thủy chính xác và cá nhân hóa nhất.</p>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -68,7 +72,7 @@ const UserInfoModal: React.FC<Props> = ({ onSubmit }) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <fieldset className="border border-gray-600 p-4 rounded col-span-2 md:col-span-1">
+            <fieldset className={`border border-gray-600 p-4 rounded ${purchaseType === PurchaseType.WEDDING ? 'col-span-2 md:col-span-1' : 'col-span-2'}`}>
               <legend className="px-2 text-yellow-500">{purchaseType === PurchaseType.WEDDING ? "Thông tin Chú rể" : "Thông tin của bạn"}</legend>
               <input type="text" name="name" placeholder="Họ và tên" value={primaryInfo.name} onChange={handlePrimaryChange} className="w-full bg-gray-700 p-2 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 mb-2" />
               <input type="date" name="dob" value={primaryInfo.dob} onChange={handlePrimaryChange} className="w-full bg-gray-700 p-2 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500" />

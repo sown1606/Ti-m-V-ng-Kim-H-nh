@@ -99,7 +99,7 @@ const App: React.FC = () => {
                     </div>
                 </main>
             </div>
-            <audio ref={audioRef} src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop muted />
+            <audio ref={audioRef} src="https://cdn.pixabay.com/download/audio/2022/11/17/audio_8b28f6738b.mp3" loop muted />
             <button
                 onClick={toggleMute}
                 className="fixed bottom-4 right-4 bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-full shadow-lg transition-transform transform hover:scale-110"
