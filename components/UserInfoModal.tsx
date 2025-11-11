@@ -43,7 +43,7 @@ const UserInfoModal: React.FC<Props> = ({ onSubmit }) => {
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center bg-cover bg-center"
-      style={{backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1610041321420-596317551435?q=80&w=1974&auto=format&fit=crop')"}}
+      style={{backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/backgrounds/gold-bg.jpg')"}}
     >
       <div className="bg-gray-800 border border-yellow-600 rounded-lg shadow-2xl p-8 w-full max-w-lg text-yellow-50">
         <h2 className="text-3xl font-bold text-center mb-2 text-yellow-400">Chào mừng đến với Kim Hạnh II</h2>

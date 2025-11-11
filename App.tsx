@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Product, PurchaseType, SavedCollection } from './types';
+import { User, Product, SavedCollection } from './types';
 import UserInfoModal from './components/UserInfoModal';
 import Header from './components/Header';
 import CategoryPanel from './components/CategoryPanel';
@@ -78,7 +78,7 @@ const App: React.FC = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-        <div className="min-h-screen bg-cover bg-center bg-fixed text-yellow-50" style={{backgroundImage: "url('https://picsum.photos/1920/1080?grayscale&blur=2')"}}>
+        <div className="min-h-screen bg-cover bg-center bg-fixed text-yellow-50" style={{backgroundImage: "url('/images/backgrounds/main-bg.jpg')"}}>
             <div className="min-h-screen bg-black bg-opacity-70">
                 <Header />
                 <main className="p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -98,7 +98,7 @@ const App: React.FC = () => {
                     </div>
                 </main>
             </div>
-            <audio ref={audioRef} src="https://cdn.pixabay.com/download/audio/2022/10/01/audio_70659bf517.mp3" loop muted />
+            <audio ref={audioRef} src="/music/background-music.mp3" loop muted />
             <button
                 onClick={toggleMute}
                 className="fixed bottom-4 right-4 bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-full shadow-lg transition-transform transform hover:scale-110"
