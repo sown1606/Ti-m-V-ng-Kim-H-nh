@@ -22,6 +22,13 @@ export interface Product {
   category: string;
   imageUrl: string;
   instanceId?: number;
+  weight?: number;
+  labor_cost?: number;
+}
+
+export interface GoldPrice {
+  buy_price: number;
+  sell_price: number;
 }
 
 export interface Category {

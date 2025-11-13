@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { User, PurchaseType, PersonInfo } from '../types';
+import { X } from 'lucide-react'; // Import icon 'X'
 
 interface Props {
   onSubmit: (user: User) => void;
+  onClose: () => void; // Hàm để đóng modal
 }
 
-const UserInfoModal: React.FC<Props> = ({ onSubmit }) => {
+const UserInfoModal: React.FC<Props> = ({ onSubmit, onClose }) => {
   const [purchaseType, setPurchaseType] = useState<PurchaseType>(PurchaseType.REGULAR);
   const [primaryInfo, setPrimaryInfo] = useState<PersonInfo>({ name: '', dob: '' });
   const [partnerInfo, setPartnerInfo] = useState<PersonInfo>({ name: '', dob: '' });
@@ -41,11 +43,22 @@ const UserInfoModal: React.FC<Props> = ({ onSubmit }) => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-cover bg-center"
       style={{backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/backgrounds/gold-bg.jpg')"}}
     >
-      <div className="bg-gray-800 border border-yellow-600 rounded-lg shadow-2xl p-8 w-full max-w-lg text-yellow-50">
+      {/* Thêm 'relative' vào div này */}
+      <div className="relative bg-gray-800 border border-yellow-600 rounded-lg shadow-2xl p-8 w-full max-w-lg text-yellow-50">
+
+        {/* Nút 'Close' (X) ở góc */}
+        <button
+          onClick={onClose}
+          className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 z-50 p-2 bg-gray-900 hover:bg-red-700 text-gray-300 hover:text-white rounded-full transition-all"
+          title="Đóng"
+        >
+          <X size={22} />
+        </button>
+
         <h2 className="text-3xl font-bold text-center mb-2 text-yellow-400">Chào mừng đến với Kim Hạnh II</h2>
         <p className="text-center text-gray-300 mb-6">Cung cấp thông tin của bạn để AI phân tích và tư vấn bộ trang sức hoàn hảo, mang lại may mắn và tài lộc.</p>
 
@@ -88,9 +101,9 @@ const UserInfoModal: React.FC<Props> = ({ onSubmit }) => {
                  <input type="tel" name="phone" placeholder="Số điện thoại (để lưu bộ sưu tập)" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-gray-700 p-2 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"/>
             </div>
           </div>
-          
+
           {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
-          
+
           <button type="submit" className="w-full mt-6 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-4 rounded transition-transform transform hover:scale-105">
             Bắt đầu thiết kế
           </button>

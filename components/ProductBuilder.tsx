@@ -1,10 +1,10 @@
-
-import React, { useRef, useCallback } from 'react';
-import { Product } from '../types';
+import React, {useRef, useCallback, useState, useEffect, useMemo} from 'react';
+import {GoldPrice, Product} from '../types';
 import { useDrop, useDrag, DropTargetMonitor } from 'react-dnd';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { Download, Image as ImageIcon, Trash2, Save } from 'lucide-react';
+import {fetchGoldPrice} from "@/services/strapiService.ts";
 
 interface Props {
   products: Product[];
@@ -66,6 +66,16 @@ const DraggableProduct: React.FC<DraggableProductProps> = ({ product, index, mov
 
 const ProductBuilder: React.FC<Props> = ({ products, setProducts, onRemoveProduct, onSave }) => {
     const builderRef = useRef<HTMLDivElement>(null);
+    const [goldPrice, setGoldPrice] = useState<GoldPrice | null>(null);
+
+    // 1. Fetch giá vàng khi component mount
+    useEffect(() => {
+        const loadGoldPrice = async () => {
+            const price = await fetchGoldPrice();
+            setGoldPrice(price);
+        };
+        loadGoldPrice();
+    }, []);
 
     const moveProduct = useCallback((dragIndex: number, hoverIndex: number) => {
         setProducts(prevProducts => {
@@ -76,6 +86,24 @@ const ProductBuilder: React.FC<Props> = ({ products, setProducts, onRemoveProduc
         });
     }, [setProducts]);
 
+    // 2. Tính toán tổng giá trị (dùng useMemo để tối ưu)
+    const { totalLabor, totalWeight, totalPrice } = useMemo(() => {
+        // SỬA Ở ĐÂY: 1 Lượng = 10 Chỉ
+        const pricePerChi = (goldPrice?.sell_price || 0) / 10; // (Giá 1 Lượng / 10)
+
+        const totalLabor = products.reduce((sum, p) => sum + (p.labor_cost || 0), 0);
+        const totalWeight = products.reduce((sum, p) => sum + (p.weight || 0), 0);
+        const totalGoldValue = totalWeight * pricePerChi; // (Tổng số chỉ * giá 1 chỉ)
+        const totalPrice = totalGoldValue + totalLabor;
+
+        return { totalLabor, totalWeight, totalPrice };
+    }, [products, goldPrice]);
+
+    // 3. Hàm format tiền
+    const formatCurrency = (value: number) => {
+        if (value === 0) return '0Tr';
+        return `${(value / 1000000).toFixed(1)}Tr`;
+    };
 
     const exportAs = async (format: 'png' | 'pdf') => {
         if (!builderRef.current) return;
@@ -115,9 +143,9 @@ const ProductBuilder: React.FC<Props> = ({ products, setProducts, onRemoveProduc
                 </div>
             ) : (
                 products.map((product, index) => (
-                    <DraggableProduct 
-                        key={product.instanceId} 
-                        product={product} 
+                    <DraggableProduct
+                        key={product.instanceId}
+                        product={product}
                         index={index}
                         moveProduct={moveProduct}
                         onRemove={onRemoveProduct}
@@ -126,8 +154,8 @@ const ProductBuilder: React.FC<Props> = ({ products, setProducts, onRemoveProduc
             )}
         </div>
         <div className="mt-4 text-right text-yellow-300 font-bold text-lg">
-             <p>Giá tham khảo: -4TR (~0CHỈ)</p>
-             <p>Tiền công: ~4TR</p>
+             <p>Giá tham khảo: ~{formatCurrency(totalPrice)} (~{totalWeight.toFixed(1)}CHỈ)</p>
+             <p>Tiền công: ~{formatCurrency(totalLabor)}</p>
              <p className="text-sm text-gray-400">(Giá có thể thay đổi theo mỗi ngày)</p>
         </div>
     </div>
