@@ -1,43 +1,53 @@
+// --- File: services/strapiService.ts (ĐÃ SỬA) ---
 
 import { Category, Product } from '../types';
 import { StrapiCategoryData, StrapiResponse } from '../types';
 
-// QUAN TRỌNG: Thay thế URL này bằng địa chỉ Strapi backend của bạn
 const STRAPI_URL = 'http://ec2-18-189-20-60.us-east-2.compute.amazonaws.com:1337';
 
 const getFullStrapiUrl = (path: string) => `${STRAPI_URL}${path}`;
 
 export const fetchCategoriesWithProducts = async (): Promise<Category[]> => {
   try {
-    // Cập nhật populate query từ `imageUrl` sang `images`
-    const response = await fetch(`${STRAPI_URL}/api/categories?populate[products][populate][0]=images`);
+    // Câu query này ĐÃ ĐÚNG (nhờ nó chúng ta mới có log)
+    const response = await fetch(`${STRAPI_URL}/api/categories?fields[0]=name&populate[products][fields][0]=name&populate[products][populate][images]=true`);
+
     if (!response.ok) {
       throw new Error(`Failed to fetch from Strapi: ${response.statusText}`);
     }
 
-    const json: StrapiResponse<StrapiCategoryData> = await response.json();
+    const json: any = await response.json(); // Tạm thời dùng 'any' vì type cũ bị sai
+    console.log('--- STRAPI RAW RESPONSE ---', JSON.stringify(json, null, 2));
 
     if (!json.data) {
-        console.error("Strapi response is missing data field", json);
-        return [];
+      console.error("Strapi response is missing data field", json);
+      return [];
     }
 
-    // Chuyển đổi dữ liệu phức tạp từ Strapi sang cấu trúc Category[] đơn giản mà ứng dụng đang dùng.
-    const categories: Category[] = json.data.map(categoryData => {
-      const categoryName = categoryData.attributes.name;
-      const products: Product[] = categoryData.attributes.products.data.map(productData => {
+    // === PHẦN SỬA LỖI LOGIC BẮT ĐẦU TỪ ĐÂY ===
 
-        // Cập nhật logic để lấy ảnh đầu tiên từ mảng 'images'
-        const imagesData = productData.attributes.images.data;
+    const categories: Category[] = json.data.map((categoryData: any) => {
+
+      // SỬA 1: Không dùng .attributes
+      const categoryName = categoryData.name;
+
+      // SỬA 2: Không dùng .attributes.products.data
+      const products: Product[] = categoryData.products.map((productData: any) => {
+
+        // SỬA 3: Không dùng .attributes.images.data
+        const imagesData = productData.images;
+
         const imageUrl = (imagesData && imagesData.length > 0)
-          ? getFullStrapiUrl(imagesData[0].attributes.url)
-          : '/placeholder.png'; // Hình ảnh dự phòng
+            // SỬA 4: Không dùng .attributes.url
+            ? getFullStrapiUrl(imagesData[0].url)
+            : '/placeholder.png';
 
         return {
           id: productData.id,
-          name: productData.attributes.name,
+          // SỬA 5: Không dùng .attributes.name
+          name: productData.name,
           category: categoryName,
-          imageUrl: imageUrl, // Giữ nguyên trường `imageUrl` để các component khác không bị lỗi
+          imageUrl: imageUrl,
         };
       });
 
@@ -47,9 +57,11 @@ export const fetchCategoriesWithProducts = async (): Promise<Category[]> => {
       };
     });
 
+    // === KẾT THÚC PHẦN SỬA ===
+
     return categories;
   } catch (error) {
     console.error("Error fetching categories from Strapi:", error);
-    throw error; // Ném lỗi ra để component có thể bắt và xử lý
+    throw error;
   }
 };
