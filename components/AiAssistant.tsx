@@ -18,6 +18,7 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const idleTimerRef = useRef<number | undefined>(undefined);
+  const [hasSentIdleMessage, setHasSentIdleMessage] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -36,20 +37,50 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
 
   // Hàm gọi API backend an toàn
   const callAiChat = async (body: any) => {
-    const response = await fetch(AI_CHAT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!response.ok) {
-      throw new Error('AI chat request failed');
+    try {
+      console.log('[AI CHAT][request body]', body);
+
+      const response = await fetch(AI_CHAT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      console.log('[AI CHAT][status]', response.status);
+
+      const raw = await response.text();
+      console.log('[AI CHAT][raw response]', raw);
+
+      if (!response.ok) {
+        console.error('[AI CHAT][non-200 response]', raw);
+        throw new Error('AI chat request failed');
+      }
+
+      let data: any;
+      try {
+        data = JSON.parse(raw);
+      } catch (err) {
+        console.error('[AI CHAT][JSON parse error]', err);
+        throw new Error('Cannot parse AI response JSON');
+      }
+
+      console.log('[AI CHAT][parsed data]', data);
+      console.log('[AI CHAT][text length]', data?.text?.length);
+      console.log('[AI CHAT][text]', data?.text);
+
+      return data.text;
+    } catch (err) {
+      console.error('[AI CHAT][frontend error]', err);
+      throw err;
     }
-    const data = await response.json();
-    return data.text;
   };
 
+  const initialCalledRef = useRef(false);
   // Lần đầu: gọi AI tư vấn theo thông tin user
   useEffect(() => {
+    if (!user || initialCalledRef.current) return;
+    initialCalledRef.current = true;
+
     const fetchInitialAdvice = async () => {
       setIsLoading(true);
       try {
@@ -57,7 +88,7 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
         setMessages([{ role: 'model', content: advice }]);
       } catch (e) {
         setMessages([
-          { role: 'model', content: 'Lỗi: Không thể kết nối với KimHanh_II AI.' },
+          { role: 'model', content: 'Lỗi: Không thể kết nối với Kim Hạnh II AI.' },
         ]);
       }
       setIsLoading(false);
@@ -102,6 +133,8 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
   useEffect(() => {
     if (!user) return;
     if (isLoading) return;
+  if (hasSentIdleMessage) return;
+  if (messages.length === 0) return;
 
     if (idleTimerRef.current !== undefined) {
       window.clearTimeout(idleTimerRef.current);
@@ -116,14 +149,15 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
               'Hông hỏi nữa thì thôi em đi ngủ xíu nha 😴 Khi nào anh/chị cần tư vấn thêm cứ gọi em dậy liền.',
         },
       ]);
-    }, 60000); // 60 giây
+    setHasSentIdleMessage(true);
+  }, 60000);
 
     return () => {
       if (idleTimerRef.current !== undefined) {
         window.clearTimeout(idleTimerRef.current);
       }
     };
-  }, [messages, user, isLoading]);
+  }, [messages, user, isLoading, hasSentIdleMessage]);
 
   // Tùy chỉnh renderer cho Markdown
   const renderers = {
@@ -161,9 +195,9 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
   return (
       <div className="bg-black bg-opacity-40 border border-yellow-800 rounded-lg p-4 flex flex-col h-full max-h-[80vh]">
         <h3 className="text-xl font-bold text-yellow-400 mb-4 border-b border-yellow-700 pb-2">
-          KimHanh_II AI
+          Kim Hạnh 2 AI
         </h3>
-        <div className="flex-grow max-h-[60vh] overflow-y-auto pr-2 space-y-4">
+        <div className="flex-grow overflow-y-auto pr-2 space-y-4">
           {messages.map((msg, index) => (
               <div
                   key={index}
@@ -200,7 +234,7 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
                   <Bot size={20} />
                 </div>
                 <div className="max-w-xs md:max-w-sm lg:max-w-md rounded-lg p-3 bg-gray-700 text-yellow-50 italic">
-                  KimHanh_II AI đang suy nghĩ cho anh/chị...
+                  Kim Hạnh II AI đang suy nghĩ cho anh/chị...
                 </div>
               </div>
           )}

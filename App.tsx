@@ -16,9 +16,9 @@ const App: React.FC = () => {
         const savedUser = localStorage.getItem('kimHanhUser');
         return savedUser ? JSON.parse(savedUser) : null;
     });
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(!user);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
-    const [isMuted, setIsMuted] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
     const audioRef = useRef<HTMLAudioElement>(null);
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
@@ -74,21 +74,66 @@ const App: React.FC = () => {
     // === KẾT THÚC THÊM MỚI ===
 
     const addProductToBuilder = (product: Product) => {
-        setSelectedProducts(prev => [...prev, { ...product, instanceId: Date.now() }]);
+        setSelectedProducts((prev) => {
+            const index = prev.length;
+            const baseX = 80;
+            const baseY = 80;
+            const offsetX = 180;
+            const offsetY = 220;
+
+            const x = baseX + (index % 3) * offsetX;
+            const y = baseY + Math.floor(index / 3) * offsetY;
+
+            return [
+                ...prev,
+                {
+                    ...product,
+                    instanceId: Date.now() + index,
+                    quantity: 1,
+                    x,
+                    y,
+                },
+            ];
+        });
     };
+
+    const silentSaveCollection = React.useCallback(
+        (phone: string, products: Product[]) => {
+            const savedCollectionsJSON = localStorage.getItem('jewelryCollections');
+            let savedCollections: SavedCollection[] = savedCollectionsJSON
+                ? JSON.parse(savedCollectionsJSON)
+                : [];
+            const existingIndex = savedCollections.findIndex((c) => c.phone === phone);
+            const newCollection: SavedCollection = { phone, products };
+            if (existingIndex > -1) {
+                savedCollections[existingIndex] = newCollection;
+            } else {
+                savedCollections.push(newCollection);
+            }
+            localStorage.setItem(
+                'jewelryCollections',
+                JSON.stringify(savedCollections)
+            );
+        },
+        []
+    );
 
     // (Các hàm removeProduct, saveCollection, toggleMute giữ nguyên)
     const removeProductFromBuilder = (instanceId: number) => { setSelectedProducts(prev => prev.filter(p => p.instanceId !== instanceId)); };
     const handleSaveCollection = () => {
-        if (!user || !user.phone) { alert("Please provide user information before saving."); return; }
-        const savedCollectionsJSON = localStorage.getItem('jewelryCollections');
-        let savedCollections: SavedCollection[] = savedCollectionsJSON ? JSON.parse(savedCollectionsJSON) : [];
-        const existingIndex = savedCollections.findIndex(c => c.phone === user.phone);
-        const newCollection: SavedCollection = { phone: user.phone, products: selectedProducts };
-        if (existingIndex > -1) { savedCollections[existingIndex] = newCollection; } else { savedCollections.push(newCollection); }
-        localStorage.setItem('jewelryCollections', JSON.stringify(savedCollections));
-        alert("Bộ sưu tập đã được lưu!");
+        if (!user || !user.phone) {
+            alert('Please provide user information before saving.');
+            return;
+        }
+
+        silentSaveCollection(user.phone, selectedProducts);
+        alert('Bộ sưu tập đã được lưu!');
     };
+
+    useEffect(() => {
+        if (!user?.phone) return;
+        silentSaveCollection(user.phone, selectedProducts);
+    }, [selectedProducts, user, silentSaveCollection]);
 
     // (Hàm toggleMute đã ĐÚNG, giữ nguyên)
     const toggleMute = () => {
@@ -152,12 +197,17 @@ const App: React.FC = () => {
     // SỬA 5: Restructure lại return để Modal nằm BÊN TRÊN
     return (
         <DndProvider backend={HTML5Backend}>
-            {isModalOpen && <UserInfoModal onSubmit={handleUserSubmit} onClose={handleModalClose} />}
-
+            {isModalOpen && (
+                <UserInfoModal
+                    initialUser={user}
+                    onSubmit={handleUserSubmit}
+                    onClose={handleModalClose}
+                />
+            )}
             <div className="min-h-screen bg-cover bg-center bg-fixed text-yellow-50" style={{backgroundImage: "url('/images/backgrounds/main-bg.jpg')"}}>
                 <div className="min-h-screen bg-black bg-opacity-70 flex flex-col">
                     <Header onUpdateInfoClick={() => setIsModalOpen(true)} />
-                    <div className="flex-grow flex items-center justify-center">
+                    <div className="flex-grow flex items-stretch justify-center">
                         {renderContent()}
                     </div>
                 </div>

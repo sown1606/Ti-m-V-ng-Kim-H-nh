@@ -1,115 +1,245 @@
-import React, { useState } from 'react';
-import { User, PurchaseType, PersonInfo } from '../types';
-import { X } from 'lucide-react'; // Import icon 'X'
+import React, { useEffect, useState } from 'react';
+import { User } from '../types';
+import { X } from 'lucide-react';
 
 interface Props {
+  initialUser: User | null;
   onSubmit: (user: User) => void;
-  onClose: () => void; // Hàm để đóng modal
+  onClose: () => void;
 }
 
-const UserInfoModal: React.FC<Props> = ({ onSubmit, onClose }) => {
-  const [purchaseType, setPurchaseType] = useState<PurchaseType>(PurchaseType.REGULAR);
-  const [primaryInfo, setPrimaryInfo] = useState<PersonInfo>({ name: '', dob: '' });
-  const [partnerInfo, setPartnerInfo] = useState<PersonInfo>({ name: '', dob: '' });
-  const [phone, setPhone] = useState<string>('');
-  const [error, setError] = useState<string>('');
+const defaultUser: User = {
+  phone: '',
+  primary: {
+    name: '',
+    dob: '',
+  },
+  purchaseType: 'regular' as User['purchaseType'],
+};
 
-  const handlePrimaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPrimaryInfo({ ...primaryInfo, [e.target.name]: e.target.value });
+const UserInfoModal: React.FC<Props> = ({ initialUser, onSubmit, onClose }) => {
+  const [form, setForm] = useState<User>(initialUser || defaultUser);
+
+  useEffect(() => {
+    if (initialUser) {
+      setForm(initialUser);
+    }
+  }, [initialUser]);
+
+  const handleChangePrimary = (field: 'name' | 'dob', value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      primary: {
+        ...prev.primary,
+        [field]: value,
+      },
+    }));
   };
 
-  const handlePartnerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPartnerInfo({ ...partnerInfo, [e.target.name]: e.target.value });
+  const handleChangePartner = (field: 'name' | 'dob', value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      partner: {
+        ...(prev.partner || { name: '', dob: '' }),
+        [field]: value,
+      },
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!primaryInfo.name || !primaryInfo.dob || !phone) {
-      setError('Vui lòng điền đầy đủ thông tin của bạn.');
+    if (!form.phone || !form.primary?.name || !form.primary?.dob) {
+      alert('Vui lòng nhập đủ Họ tên, Ngày sinh và Số điện thoại.');
       return;
     }
-    if (purchaseType === PurchaseType.WEDDING && (!partnerInfo.name || !partnerInfo.dob)) {
-      setError('Vui lòng điền đầy đủ thông tin của cả hai vợ chồng.');
-      return;
-    }
-
-    const userData: User = {
-      purchaseType,
-      primary: primaryInfo,
-      phone,
-      ...(purchaseType === PurchaseType.WEDDING && { partner: partnerInfo }),
-    };
-    onSubmit(userData);
+    onSubmit(form);
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-cover bg-center"
-      style={{backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/backgrounds/gold-bg.jpg')"}}
-    >
-      {/* Thêm 'relative' vào div này */}
-      <div className="relative bg-gray-800 border border-yellow-600 rounded-lg shadow-2xl p-8 w-full max-w-lg text-yellow-50">
-
-        {/* Nút 'Close' (X) ở góc */}
-        <button
-          onClick={onClose}
-          className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 z-50 p-2 bg-gray-900 hover:bg-red-700 text-gray-300 hover:text-white rounded-full transition-all"
-          title="Đóng"
-        >
-          <X size={22} />
-        </button>
-
-        <h2 className="text-3xl font-bold text-center mb-2 text-yellow-400">Chào mừng đến với Kim Hạnh II</h2>
-        <p className="text-center text-gray-300 mb-6">Cung cấp thông tin của bạn để AI phân tích và tư vấn bộ trang sức hoàn hảo, mang lại may mắn và tài lộc.</p>
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-yellow-400 mb-2">Bạn muốn mua vàng cho dịp nào?</label>
-            <div className="flex space-x-4">
-              <button
-                type="button"
-                onClick={() => setPurchaseType(PurchaseType.REGULAR)}
-                className={`w-full py-2 px-4 rounded transition ${purchaseType === PurchaseType.REGULAR ? 'bg-yellow-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}`}
-              >
-                Mua sắm thông thường
-              </button>
-              <button
-                type="button"
-                onClick={() => setPurchaseType(PurchaseType.WEDDING)}
-                className={`w-full py-2 px-4 rounded transition ${purchaseType === PurchaseType.WEDDING ? 'bg-yellow-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}`}
-              >
-                Trang sức cưới
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <fieldset className={`border border-gray-600 p-4 rounded ${purchaseType === PurchaseType.WEDDING ? 'col-span-2 md:col-span-1' : 'col-span-2'}`}>
-              <legend className="px-2 text-yellow-500">{purchaseType === PurchaseType.WEDDING ? "Thông tin Chú rể" : "Thông tin của bạn"}</legend>
-              <input type="text" name="name" placeholder="Họ và tên" value={primaryInfo.name} onChange={handlePrimaryChange} className="w-full bg-gray-700 p-2 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 mb-2" />
-              <input type="date" name="dob" value={primaryInfo.dob} onChange={handlePrimaryChange} className="w-full bg-gray-700 p-2 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500" />
-            </fieldset>
-
-            {purchaseType === PurchaseType.WEDDING && (
-              <fieldset className="border border-gray-600 p-4 rounded col-span-2 md:col-span-1">
-                <legend className="px-2 text-yellow-500">Thông tin Cô dâu</legend>
-                <input type="text" name="name" placeholder="Họ và tên" value={partnerInfo.name} onChange={handlePartnerChange} className="w-full bg-gray-700 p-2 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 mb-2" />
-                <input type="date" name="dob" value={partnerInfo.dob} onChange={handlePartnerChange} className="w-full bg-gray-700 p-2 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500" />
-              </fieldset>
-            )}
-             <div className="col-span-2">
-                 <input type="tel" name="phone" placeholder="Số điện thoại (để lưu bộ sưu tập)" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-gray-700 p-2 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"/>
-            </div>
-          </div>
-
-          {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
-
-          <button type="submit" className="w-full mt-6 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-4 rounded transition-transform transform hover:scale-105">
-            Bắt đầu thiết kế
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+        <div className="relative w-full max-w-5xl mx-4 bg-gradient-to-br from-black via-gray-900 to-black border border-yellow-700 rounded-xl shadow-2xl overflow-hidden">
+          {/* Nút đóng */}
+          <button
+              onClick={onClose}
+              className="absolute top-3 right-3 text-yellow-300 hover:text-yellow-100"
+          >
+            <X size={22} />
           </button>
-        </form>
+
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            {/* Cột quảng cáo / popup */}
+            <div className="p-6 bg-gradient-to-br from-red-900/80 via-red-800/80 to-red-900/80 border-r border-yellow-700 hidden md:flex flex-col justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-yellow-300 mb-3">
+                  Ưu đãi hôm nay tại Kim Hạnh II
+                </h2>
+                <p className="text-yellow-100 text-sm mb-4">
+                  Thông tin bên trái khu này có thể lấy từ Strapi (Popup Ads):
+                  text giới thiệu, hình ảnh hoặc video khuyến mãi.
+                </p>
+
+                {/* Placeholder cho hình ảnh quảng cáo */}
+                <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-yellow-600 bg-black/40 flex items-center justify-center">
+                <span className="text-yellow-200 text-xs text-center px-4">
+                  Khu vực hiển thị hình ảnh / video quảng cáo
+                  <br />
+                  (cấu hình trong Strapi &ldquo;Popup Ads&rdquo;).
+                </span>
+                </div>
+              </div>
+
+              <div className="mt-6 text-xs text-yellow-300/80">
+                Địa chỉ: 1276 Kha Vạn Cân, P.Linh Trung, TP.Thủ Đức, TP.HCM.
+              </div>
+            </div>
+
+            {/* Cột form thông tin */}
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-yellow-300 mb-4">
+                Thông tin để KimHanh_II AI tư vấn phong thủy
+              </h2>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Họ tên + ngày sinh */}
+                <div className="space-y-2">
+                  <label className="block text-sm text-yellow-200">
+                    Họ và tên (người đeo)
+                  </label>
+                  <input
+                      type="text"
+                      value={form.primary?.name || ''}
+                      onChange={(e) => handleChangePrimary('name', e.target.value)}
+                      className="w-full rounded-md bg-black/50 border border-yellow-600 px-3 py-2 text-yellow-50 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      placeholder="VD: Kiet Nguyen"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm text-yellow-200">
+                    Ngày sinh (dương lịch)
+                  </label>
+                  {/* Cho phép nhập tay luôn */}
+                  <input
+                      type="text"
+                      value={form.primary?.dob || ''}
+                      onChange={(e) => handleChangePrimary('dob', e.target.value)}
+                      className="w-full rounded-md bg-black/50 border border-yellow-600 px-3 py-2 text-yellow-50 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      placeholder="VD: 11/11/1995 hoặc 1995-11-11"
+                  />
+                </div>
+
+                {/* SĐT */}
+                <div className="space-y-2">
+                  <label className="block text-sm text-yellow-200">
+                    Số điện thoại
+                  </label>
+                  <input
+                      type="tel"
+                      value={form.phone || ''}
+                      onChange={(e) =>
+                          setForm((prev) => ({ ...prev, phone: e.target.value }))
+                      }
+                      className="w-full rounded-md bg-black/50 border border-yellow-600 px-3 py-2 text-yellow-50 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      placeholder="VD: 0909 xxx xxx"
+                  />
+                </div>
+
+                {/* Loại mua */}
+                <div className="space-y-2">
+                  <label className="block text-sm text-yellow-200">
+                    Mục đích mua
+                  </label>
+                  <div className="flex gap-4 text-sm text-yellow-100">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                          type="radio"
+                          name="purchaseType"
+                          value="regular"
+                          checked={form.purchaseType === 'regular'}
+                          onChange={() =>
+      setForm((prev: User): User => ({
+        ...prev,
+        purchaseType: 'regular' as User['purchaseType'],
+      }))
+                          }
+                      />
+                      <span>Đeo bình thường / tích lũy</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                          type="radio"
+                          name="purchaseType"
+                          value="wedding"
+                          checked={form.purchaseType === 'wedding'}
+                          onChange={() =>
+      setForm((prev: User): User => ({
+        ...prev,
+        purchaseType: 'wedding' as User['purchaseType'],
+      }))
+                          }
+                      />
+                      <span>Trang sức cưới</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Thông tin người phối ngẫu (nếu cưới) */}
+                {form.purchaseType === 'wedding' && (
+                    <div className="mt-2 border-t border-yellow-700 pt-3 space-y-3">
+                      <p className="text-sm text-yellow-300 font-semibold">
+                        Thông tin người phối ngẫu (vợ/chồng)
+                      </p>
+                      <div className="space-y-2">
+                        <label className="block text-sm text-yellow-200">
+                          Họ và tên
+                        </label>
+                        <input
+                            type="text"
+                            value={form.partner?.name || ''}
+                            onChange={(e) =>
+                                handleChangePartner('name', e.target.value)
+                            }
+                            className="w-full rounded-md bg-black/50 border border-yellow-600 px-3 py-2 text-yellow-50 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            placeholder="VD: Nguyen Thi A"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm text-yellow-200">
+                          Ngày sinh (dương lịch)
+                        </label>
+                        <input
+                            type="text"
+                            value={form.partner?.dob || ''}
+                            onChange={(e) =>
+                                handleChangePartner('dob', e.target.value)
+                            }
+                            className="w-full rounded-md bg-black/50 border border-yellow-600 px-3 py-2 text-yellow-50 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            placeholder="VD: 20/10/1996 hoặc 1996-10-20"
+                        />
+                      </div>
+                    </div>
+                )}
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                      type="button"
+                      onClick={onClose}
+                      className="px-4 py-2 rounded-md bg-gray-700 text-gray-200 text-sm hover:bg-gray-600"
+                  >
+                    Để sau
+                  </button>
+                  <button
+                      type="submit"
+                      className="px-5 py-2 rounded-md bg-yellow-500 text-black font-semibold text-sm hover:bg-yellow-400"
+                  >
+                    Lưu & Bắt đầu tư vấn
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
   );
 };
 

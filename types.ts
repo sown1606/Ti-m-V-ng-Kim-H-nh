@@ -24,6 +24,11 @@ export interface Product {
   instanceId?: number;
   weight?: number;
   labor_cost?: number;
+
+  // NEW: số lượng & vị trí kéo thả tự do trong vùng BST
+  quantity?: number; // mặc định 1
+  x?: number;        // toạ độ left (px) tương đối trong khung đỏ
+  y?: number;        // toạ độ top  (px)
 }
 
 export interface GoldPrice {
@@ -46,7 +51,7 @@ export interface SavedCollection {
   products: Product[];
 }
 
-// Strapi API response types
+// Strapi API response types (giữ nguyên)
 export interface StrapiImageFormat {
   url: string;
 }
@@ -61,8 +66,8 @@ export interface StrapiImage {
       small: StrapiImageFormat;
       medium: StrapiImageFormat;
       large: StrapiImageFormat;
-    }
-  }
+    };
+  };
 }
 
 export interface StrapiProductData {
@@ -74,8 +79,8 @@ export interface StrapiProductData {
     publishedAt: string;
     images: {
       data: StrapiImage[] | null;
-    }
-  }
+    };
+  };
 }
 
 export interface StrapiCategoryData {
@@ -87,8 +92,8 @@ export interface StrapiCategoryData {
     publishedAt: string;
     products: {
       data: StrapiProductData[];
-    }
-  }
+    };
+  };
 }
 
 export interface StrapiResponse<T> {
@@ -99,6 +104,6 @@ export interface StrapiResponse<T> {
       pageSize: number;
       pageCount: number;
       total: number;
-    }
-  }
+    };
+  };
 }
