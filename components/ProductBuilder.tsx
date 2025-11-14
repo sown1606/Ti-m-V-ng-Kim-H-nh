@@ -89,7 +89,7 @@ const ProductBuilder: React.FC<Props> = ({ products, setProducts, onRemoveProduc
     // 2. Tính toán tổng giá trị (dùng useMemo để tối ưu)
     const { totalLabor, totalWeight, totalPrice } = useMemo(() => {
         // SỬA Ở ĐÂY: 1 Lượng = 10 Chỉ
-        const pricePerChi = (goldPrice?.sell_price || 0) / 10; // (Giá 1 Lượng / 10)
+        const pricePerChi = (goldPrice?.sell_price || 0) / 100; // (Giá 1 Lượng / 10)
 
         const totalLabor = products.reduce((sum, p) => sum + (p.labor_cost || 0), 0);
         const totalWeight = products.reduce((sum, p) => sum + (p.weight || 0), 0);
