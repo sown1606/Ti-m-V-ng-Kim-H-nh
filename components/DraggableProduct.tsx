@@ -184,7 +184,7 @@ const DraggableProduct: React.FC<DraggableProductProps> = ({
         window.addEventListener('mouseup', handleMouseUp);
     };
 
-    if (!product.instanceId || !displayUrl) {
+    if (!product.instanceId) {
         return null;
     }
 

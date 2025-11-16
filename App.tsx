@@ -74,6 +74,7 @@ const App: React.FC = () => {
     // === KẾT THÚC THÊM MỚI ===
 
     const addProductToBuilder = (product: Product) => {
+        console.log('[App] addProductToBuilder', product);
         setSelectedProducts((prev) => {
             const index = prev.length;
             const baseX = 80;

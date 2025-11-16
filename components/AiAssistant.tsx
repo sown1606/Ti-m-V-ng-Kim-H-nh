@@ -193,11 +193,11 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
   };
 
   return (
-      <div className="bg-black bg-opacity-40 border border-yellow-800 rounded-lg p-4 flex flex-col h-full max-h-[80vh]">
+      <div className="bg-black bg-opacity-40 border border-yellow-800 rounded-lg p-4 flex flex-col h-full max-h-[85vh]">
         <h3 className="text-xl font-bold text-yellow-400 mb-4 border-b border-yellow-700 pb-2">
           Kim Hạnh 2 AI
         </h3>
-        <div className="flex-grow overflow-y-auto pr-2 space-y-4">
+        <div className="flex-grow overflow-y-auto pr-2 space-y-2">
           {messages.map((msg, index) => (
               <div
                   key={index}
@@ -211,13 +211,15 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
                     </div>
                 )}
                 <div
-  className={`w-full rounded-lg p-3 whitespace-pre-wrap break-words ${
+                    className={`max-w-[95%] rounded-lg px-3 py-2 text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap break-words ${
                         msg.role === 'user'
                             ? 'bg-blue-800 text-white'
                             : 'bg-gray-700 text-yellow-50'
                     }`}
                 >
-                  <ReactMarkdown components={renderers}>{msg.content}</ReactMarkdown>
+                  <ReactMarkdown components={renderers}>
+                    {msg.content}
+                  </ReactMarkdown>
                 </div>
                 {msg.role === 'user' && (
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
