@@ -7,8 +7,10 @@ import ProductBuilder from './components/ProductBuilder';
 import AiAssistant from './components/AiAssistant';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { VolumeX, Volume2, LoaderCircle } from 'lucide-react';
+import { VolumeX, Volume2, LoaderCircle, MessageCircle, X } from 'lucide-react';
 import { fetchCategoriesWithProducts } from './services/strapiService';
+
+const THEME_BG_URL = 'https://tiemvangkimhanh2.com/public/admin/images/goldtheme.jpg';
 
 const App: React.FC = () => {
     // SỬA 1: Đọc user từ localStorage khi khởi động
@@ -23,6 +25,7 @@ const App: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isAssistantOpen, setIsAssistantOpen] = useState<boolean>(false);
 
     useEffect(() => {
         const loadCategories = async () => {
@@ -74,7 +77,6 @@ const App: React.FC = () => {
     // === KẾT THÚC THÊM MỚI ===
 
     const addProductToBuilder = (product: Product) => {
-        console.log('[App] addProductToBuilder', product);
         setSelectedProducts((prev) => {
             const index = prev.length;
             const baseX = 80;
@@ -164,32 +166,18 @@ const App: React.FC = () => {
             return <div className="text-center text-red-400 text-xl p-4">{error}</div>;
         }
 
-        // SỬA 4: Nếu user là null, AI Assistant sẽ không được render
         return (
-            <main className="p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <div className="lg:col-span-3">
+            <main className="w-full max-w-[1680px] p-3 md:p-4 grid grid-cols-1 xl:grid-cols-12 gap-3 md:gap-4">
+                <div className="xl:col-span-3">
                     <CategoryPanel categories={categories} onProductSelect={addProductToBuilder} />
                 </div>
-                <div className="lg:col-span-6">
+                <div className="xl:col-span-9">
                     <ProductBuilder
                         products={selectedProducts}
                         setProducts={setSelectedProducts}
                         onRemoveProduct={removeProductFromBuilder}
                         onSave={handleSaveCollection}
                     />
-                </div>
-                <div className="lg:col-span-3">
-                    {user ? (
-                        <AiAssistant
-                            user={user}
-                            categories={categories}
-                            onProductSelect={addProductToBuilder}
-                        />
-                    ) : (
-                        <div className="bg-black bg-opacity-40 border border-yellow-800 rounded-lg p-4 h-full max-h-[80vh] flex items-center justify-center">
-                            <p className="text-yellow-300 text-center">Vui lòng <button onClick={() => setIsModalOpen(true)} className="font-bold underline">cung cấp thông tin</button> để nhận tư vấn từ AI.</p>
-                        </div>
-                    )}
                 </div>
             </main>
         );
@@ -205,8 +193,13 @@ const App: React.FC = () => {
                     onClose={handleModalClose}
                 />
             )}
-            <div className="min-h-screen bg-cover bg-center bg-fixed text-yellow-50" style={{backgroundImage: "url('/images/backgrounds/main-bg.jpg')"}}>
-                <div className="min-h-screen bg-black bg-opacity-70 flex flex-col">
+            <div
+                className="min-h-screen bg-cover bg-center bg-fixed text-yellow-50 text-[13px] md:text-sm"
+                style={{
+                    backgroundImage: `url('${THEME_BG_URL}')`,
+                }}
+            >
+                <div className="min-h-screen bg-black/30 flex flex-col">
                     <Header onUpdateInfoClick={() => setIsModalOpen(true)} />
                     <div className="flex-grow flex items-stretch justify-center">
                         {renderContent()}
@@ -225,10 +218,54 @@ const App: React.FC = () => {
 
                 <button
                     onClick={toggleMute}
-                    className="fixed top-4 left-4 z-50 bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-full shadow-lg transition-transform transform hover:scale-110"
+                    className="fixed top-4 left-4 z-[95] bg-yellow-600 hover:bg-yellow-700 text-white p-2.5 rounded-full shadow-lg transition-transform transform hover:scale-110"
                     aria-label={isMuted ? 'Unmute' : 'Mute'}
                 >
-                    {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+                    {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                </button>
+
+                {isAssistantOpen && (
+                    <div className="fixed bottom-20 right-4 z-[92] w-[95vw] max-w-[430px] h-[72vh] max-h-[720px] rounded-xl p-0.5 shadow-2xl">
+                        <button
+                            type="button"
+                            onClick={() => setIsAssistantOpen(false)}
+                            className="absolute -top-3 -right-3 z-[93] bg-yellow-600 hover:bg-yellow-700 text-white p-2 rounded-full shadow-lg"
+                            aria-label="Close AI assistant"
+                        >
+                            <X size={18} />
+                        </button>
+
+                        {user ? (
+                            <AiAssistant
+                                user={user}
+                                categories={categories}
+                                onProductSelect={addProductToBuilder}
+                            />
+                        ) : (
+                            <div className="bg-slate-950 border border-yellow-800 rounded-lg p-4 h-full flex items-center justify-center">
+                                <p className="text-yellow-300 text-center">
+                                    Vui lòng{' '}
+                                    <button
+                                        onClick={() => setIsModalOpen(true)}
+                                        className="font-bold underline"
+                                    >
+                                        cung cấp thông tin
+                                    </button>{' '}
+                                    để nhận tư vấn từ AI.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                <button
+                    type="button"
+                    onClick={() => setIsAssistantOpen((prev) => !prev)}
+                    className="fixed bottom-4 right-4 z-[95] bg-yellow-600 hover:bg-yellow-700 text-white px-3.5 py-2.5 rounded-full shadow-lg transition-transform transform hover:scale-105 flex items-center gap-2"
+                    aria-label={isAssistantOpen ? 'Close AI assistant' : 'Open AI assistant'}
+                >
+                    {isAssistantOpen ? <X size={18} /> : <MessageCircle size={18} />}
+                    <span className="font-semibold text-sm">AI</span>
                 </button>
             </div>
         </DndProvider>

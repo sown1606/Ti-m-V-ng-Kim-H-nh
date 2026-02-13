@@ -21,6 +21,7 @@ export interface Product {
   name: string;
   category: string;
   imageUrl: string;
+  images?: ProductImage[];
   instanceId?: number;
   weight?: number;
   labor_cost?: number;
@@ -29,6 +30,17 @@ export interface Product {
   quantity?: number; // mặc định 1
   x?: number;        // toạ độ left (px) tương đối trong khung đỏ
   y?: number;        // toạ độ top  (px)
+}
+
+export interface ProductImage {
+  name?: string;
+  url?: string;
+  formats?: {
+    medium?: { url: string };
+    large?: { url: string };
+    small?: { url: string };
+    thumbnail?: { url: string };
+  };
 }
 
 export interface GoldPrice {

@@ -24,7 +24,16 @@ interface DraggableProductProps {
     onChangeQuantity: (instanceId: number) => void;
     onPositionChange: (instanceId: number, x: number, y: number) => void;
     onResize: (instanceId: number, width: number) => void;
+    showMeta: boolean;
+    pricePerChi: number;
 }
+
+const formatShortMoney = (value: number): string => {
+    if (!Number.isFinite(value) || value <= 0) {
+        return '0 Tr';
+    }
+    return `${(value / 1_000_000).toFixed(1)} Tr`;
+};
 
 const getBaseUrlFromImageUrl = (imageUrl?: string) => {
     if (!imageUrl) return '';
@@ -40,18 +49,10 @@ const getImageUrlForQuantity = (
     product: ProductWithImages,
     quantity: number
 ): string | undefined => {
-  console.log('[IMG] getImageUrlForQuantity', {
-    name: product.name,
-    quantity,
-    images: product.images,
-    baseImageUrl: product.imageUrl,
-  });
-
     const baseImageUrl = product.imageUrl;
     const imgs = product.images;
 
     if (!imgs || imgs.length === 0) {
-    console.log('[IMG] no images, return base', baseImageUrl);
         return baseImageUrl;
     }
 
@@ -65,8 +66,6 @@ const getImageUrlForQuantity = (
     first?.formats?.medium?.url ||
     '';
 
-  console.log('[IMG] first img', { first, nameOrUrl });
-
   if (nameOrUrl) {
     const m = nameOrUrl.match(/^(.*?)(\d+)(\.[^.]*)?$/);
     if (m) {
@@ -77,8 +76,6 @@ const getImageUrlForQuantity = (
         const n = img?.name || img?.url || '';
         return n.includes(target);
       });
-
-      console.log('[IMG] pattern match', { prefix, target, matched });
     }
   }
 
@@ -90,15 +87,11 @@ const getImageUrlForQuantity = (
         img?.formats?.large?.url ||
         img?.url;
 
-  console.log('[IMG] final choose', { index, img, variantPath });
-
     if (!variantPath) return baseImageUrl;
     if (variantPath.startsWith('http')) return variantPath;
 
     const base = getBaseUrlFromImageUrl(baseImageUrl);
     const finalUrl = base ? `${base}${variantPath}` : variantPath;
-
-    console.log('[IMG] finalUrl', finalUrl);
     return finalUrl;
 };
 
@@ -108,6 +101,8 @@ const DraggableProduct: React.FC<DraggableProductProps> = ({
                                                                onChangeQuantity,
                                                                onPositionChange,
                                                                onResize,
+                                                               showMeta,
+                                                               pricePerChi,
                                                            }) => {
     const ref = useRef<HTMLDivElement | null>(null);
     const [isActive, setIsActive] = useState(false);
@@ -116,13 +111,8 @@ const DraggableProduct: React.FC<DraggableProductProps> = ({
     const displayUrl =
         getImageUrlForQuantity(product, quantity) || product.imageUrl || '';
     const width = product.displayWidth ?? 260;
-
-    console.log('[DraggableProduct] render', {
-        name: product.name,
-        quantity,
-        displayUrl,
-        images: product.images,
-    });
+    const estimatedPrice =
+        ((product.weight ?? 0) * pricePerChi + (product.labor_cost ?? 0)) * quantity;
 
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
         if ((e.target as HTMLElement).closest('button')) return;
@@ -203,7 +193,7 @@ const DraggableProduct: React.FC<DraggableProductProps> = ({
         >
             <div
                 className={[
-        'relative inline-flex transition-all',
+        'relative inline-flex flex-col items-center transition-all',
         isActive ? 'ring-2 ring-yellow-400' : '',
                 ].join(' ')}
             >
@@ -213,6 +203,14 @@ const DraggableProduct: React.FC<DraggableProductProps> = ({
                     style={{ width, maxHeight: 420 }}
                     className="object-contain rounded-lg"
                 />
+                {showMeta ? (
+                    <div className="mt-1 max-w-[260px] bg-black/65 text-yellow-100 text-[11px] px-2 py-1 rounded text-center leading-tight">
+                        <div className="font-semibold">{product.name}</div>
+                        <div className="text-yellow-300">
+                            {(product.weight ?? 0).toFixed(1)} chỉ | ~{formatShortMoney(estimatedPrice)}
+                        </div>
+                    </div>
+                ) : null}
 
                 <button
                     onClick={(e) => {

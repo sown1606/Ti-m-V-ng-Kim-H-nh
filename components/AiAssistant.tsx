@@ -9,8 +9,7 @@ interface Props {
   onProductSelect: (product: Product) => void; // Nhận hàm thêm product từ App.tsx
 }
 
-// URL của API backend an toàn
-const AI_CHAT_URL = 'http://ec2-18-189-20-60.us-east-2.compute.amazonaws.com:1337/api/ai/chat';
+const AI_CHAT_URL = `${import.meta.env.VITE_API_URL || 'http://ec2-18-189-20-60.us-east-2.compute.amazonaws.com:1337/api'}`.replace(/\/+$/, '') + '/ai/chat';
 
 const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -38,40 +37,28 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
   // Hàm gọi API backend an toàn
   const callAiChat = async (body: any) => {
     try {
-      console.log('[AI CHAT][request body]', body);
-
       const response = await fetch(AI_CHAT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
-      console.log('[AI CHAT][status]', response.status);
-
       const raw = await response.text();
-      console.log('[AI CHAT][raw response]', raw);
 
       if (!response.ok) {
-        console.error('[AI CHAT][non-200 response]', raw);
         throw new Error('AI chat request failed');
       }
 
       let data: any;
       try {
         data = JSON.parse(raw);
-      } catch (err) {
-        console.error('[AI CHAT][JSON parse error]', err);
+      } catch {
         throw new Error('Cannot parse AI response JSON');
       }
 
-      console.log('[AI CHAT][parsed data]', data);
-      console.log('[AI CHAT][text length]', data?.text?.length);
-      console.log('[AI CHAT][text]', data?.text);
-
       return data.text;
-    } catch (err) {
-      console.error('[AI CHAT][frontend error]', err);
-      throw err;
+    } catch (error) {
+      throw error;
     }
   };
 
@@ -193,11 +180,11 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
   };
 
   return (
-      <div className="bg-black bg-opacity-40 border border-yellow-800 rounded-lg p-4 flex flex-col h-full max-h-[85vh]">
-        <h3 className="text-xl font-bold text-yellow-400 mb-4 border-b border-yellow-700 pb-2">
+      <div className="bg-slate-900/95 rounded-lg p-3 flex flex-col h-full shadow-2xl">
+        <h3 className="text-lg font-bold text-yellow-300 mb-3 border-b border-slate-700 pb-2">
           Kim Hạnh 2 AI
         </h3>
-        <div className="flex-grow overflow-y-auto pr-2 space-y-2">
+        <div className="flex-grow overflow-y-auto pr-1 space-y-2">
           {messages.map((msg, index) => (
               <div
                   key={index}
@@ -211,7 +198,7 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
                     </div>
                 )}
                 <div
-                    className={`max-w-[95%] rounded-lg px-3 py-2 text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap break-words ${
+                    className={`max-w-[95%] rounded-lg px-2.5 py-2 text-xs md:text-sm leading-relaxed whitespace-pre-wrap break-words ${
                         msg.role === 'user'
                             ? 'bg-blue-800 text-white'
                             : 'bg-gray-700 text-yellow-50'
@@ -244,14 +231,14 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="mt-4 flex">
+        <div className="mt-3 flex">
           <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Hỏi thêm về phong thủy..."
-              className="flex-grow bg-gray-700 p-2 rounded-l-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+              className="flex-grow bg-gray-800 p-2 rounded-l-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white text-sm"
               disabled={isLoading}
           />
           <button
@@ -259,7 +246,7 @@ const AiAssistant: React.FC<Props> = ({ user, categories, onProductSelect }) => 
               disabled={isLoading}
               className="bg-yellow-600 text-white p-2 rounded-r-md hover:bg-yellow-700 disabled:bg-gray-500"
           >
-            <SendHorizonal size={24} />
+            <SendHorizonal size={20} />
           </button>
         </div>
       </div>
