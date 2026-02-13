@@ -42,7 +42,8 @@ const ProductBuilder: React.FC<Props> = ({
   }, []);
 
   const { totalLabor, totalWeight, totalPrice } = useMemo(() => {
-    const pricePerChi = (goldPrice?.sell_price || 0) / 100;
+    // Strapi stores sell_price by "cay". Convert to "chi" with 1 cay = 10 chi.
+    const pricePerChi = (goldPrice?.sell_price || 0) / 10;
     const labor = products.reduce(
       (sum, product: any) => sum + (product?.labor_cost || 0) * (product?.quantity ?? 1),
       0
@@ -55,7 +56,7 @@ const ProductBuilder: React.FC<Props> = ({
     const finalPrice = goldValue + labor;
     return { totalLabor: labor, totalWeight: weight, totalPrice: finalPrice };
   }, [products, goldPrice]);
-  const pricePerChi = (goldPrice?.sell_price || 0) / 100;
+  const pricePerChi = (goldPrice?.sell_price || 0) / 10;
 
   const formatCurrency = (value: number) => {
     if (value === 0) {

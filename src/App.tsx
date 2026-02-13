@@ -179,7 +179,7 @@ function App() {
             boxShadow: '0 12px 24px rgba(15, 23, 42, 0.08)',
           }}
         >
-          <h1 style={{ margin: 0, fontSize: isMobile ? 22 : 28 }}>KimHanhII Jewelry Shop</h1>
+          <h1 style={{ margin: 0, fontSize: isMobile ? 22 : 28 }}>Kim Hạnh II Jewelry Shop</h1>
           <p style={{ margin: '6px 0 0', color: '#475569' }}>
             Drag products from the gallery to build your perfect jewelry set.
           </p>
@@ -382,4 +382,3 @@ function App() {
 }
 
 export default App;
-

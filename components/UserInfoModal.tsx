@@ -56,7 +56,7 @@ const UserInfoModal: React.FC<Props> = ({ initialUser, onSubmit, onClose }) => {
   };
 
   return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+      <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/80">
         <div className="relative w-full max-w-5xl mx-4 bg-gradient-to-br from-black via-gray-900 to-black border border-yellow-700 rounded-xl shadow-2xl overflow-hidden">
           {/* Nút đóng */}
           <button
@@ -96,7 +96,7 @@ const UserInfoModal: React.FC<Props> = ({ initialUser, onSubmit, onClose }) => {
             {/* Cột form thông tin */}
             <div className="p-6">
               <h2 className="text-xl font-bold text-yellow-300 mb-4">
-                Thông tin để KimHanh_II AI tư vấn phong thủy
+                Thông tin để Kim Hạnh II AI tư vấn phong thủy
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
