@@ -1,6 +1,8 @@
-const RAW_API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:1337'}`.trim();
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:1337/api'}`.trim();
+const IMAGE_URL = `${import.meta.env.VITE_IMAGE_URL || API_URL.replace(/\/api\/?$/, '')}`.trim();
 const API_TOKEN = `${import.meta.env.VITE_API_TOKEN ?? ''}`.trim();
-const API_BASE_URL = RAW_API_URL.replace(/\/+$/, '');
+const API_BASE_URL = API_URL.replace(/\/+$/, '');
+const IMAGE_BASE_URL = IMAGE_URL.replace(/\/+$/, '');
 const REQUEST_TIMEOUT_MS = 15000;
 
 type JsonRecord = Record<string, unknown>;
@@ -60,7 +62,7 @@ const toAbsoluteUrl = (url: string): string => {
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
   }
-  return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  return `${IMAGE_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
 const normalizeEntity = (entity: unknown): JsonRecord => {
@@ -277,4 +279,3 @@ export async function getGoldPrice(): Promise<GoldPrice | null> {
     updatedAt: toText(entry.updatedAt, ''),
   };
 }
-

@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Keep baseline typography consistent before component styles load. */
+body {
+  margin: 0;
+  font-family: 'Garamond', 'Times New Roman', serif;
+}
